@@ -196,30 +196,35 @@ function _processMessage() {
         switch (_context.prev = _context.next) {
           case 0:
             console.log("Message received in processMessage: " + JSON.stringify(arg));
-            messageFromDialog = JSON.parse(arg.message);
+            messageFromDialog = JSON.parse(arg.message); //save access token to the local storage
+
+            window.sessionStorage.setItem('ADtoken', messageFromDialog.result);
 
             if (!(messageFromDialog.status === "success")) {
-              _context.next = 10;
+              _context.next = 13;
               break;
             }
 
             // We now have a valid access token.
             loginDialog.close();
-            _context.next = 6;
+            _context.next = 7;
             return sso.makeGraphApiCall(messageFromDialog.result);
 
-          case 6:
+          case 7:
             response = _context.sent;
+            //save user's e-mail and name to the local storage
+            window.sessionStorage.setItem('userEmail', response.mail);
+            window.sessionStorage.setItem('userDisplayName', response.displayName);
             documentHelper.writeDataToOfficeDocument(response);
-            _context.next = 12;
+            _context.next = 15;
             break;
 
-          case 10:
+          case 13:
             // Something went wrong with authentication or the authorization of the web application.
             loginDialog.close();
             sso.showMessage(JSON.stringify(messageFromDialog.error.toString()));
 
-          case 12:
+          case 15:
           case "end":
             return _context.stop();
         }
@@ -283,62 +288,68 @@ function _getGraphData() {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            _context.prev = 0;
-            _context.next = 3;
+            console.log('Get graph data function is initiated here');
+            _context.prev = 1;
+            _context.next = 4;
             return OfficeRuntime.auth.getAccessToken({
               allowSignInPrompt: true
             });
 
-          case 3:
+          case 4:
             bootstrapToken = _context.sent;
-            _context.next = 6;
+            console.log('Step 1 - bootstrap token: ', bootstrapToken);
+            _context.next = 8;
             return sso.getGraphToken(bootstrapToken);
 
-          case 6:
+          case 8:
             exchangeResponse = _context.sent;
+            console.log('Step 1 - exchange response: ', exchangeResponse);
 
             if (!exchangeResponse.claims) {
-              _context.next = 12;
+              _context.next = 15;
               break;
             }
 
-            _context.next = 10;
+            _context.next = 13;
             return OfficeRuntime.auth.getAccessToken({
               authChallenge: exchangeResponse.claims
             });
 
-          case 10:
+          case 13:
             mfaBootstrapToken = _context.sent;
             exchangeResponse = sso.getGraphToken(mfaBootstrapToken);
 
-          case 12:
+          case 15:
             if (!exchangeResponse.error) {
-              _context.next = 16;
+              _context.next = 20;
               break;
             }
 
             // AAD errors are returned to the client with HTTP code 200, so they do not trigger
             // the catch block below.
+            console.log("exchangeResponseErrorValue: ", exchangeResponse.error);
             handleAADErrors(exchangeResponse);
-            _context.next = 21;
-            break;
-
-          case 16:
-            _context.next = 18;
-            return sso.makeGraphApiCall(exchangeResponse.access_token);
-
-          case 18:
-            response = _context.sent;
-            documentHelper.writeDataToOfficeDocument(response);
-            sso.showMessage("Your data has been added to the document.");
-
-          case 21:
             _context.next = 26;
             break;
 
-          case 23:
-            _context.prev = 23;
-            _context.t0 = _context["catch"](0);
+          case 20:
+            _context.next = 22;
+            return sso.makeGraphApiCall(exchangeResponse.access_token);
+
+          case 22:
+            response = _context.sent;
+            // write token and user e-mail to session storage
+            console.log("What I need: ", response);
+            documentHelper.writeDataToOfficeDocument(response);
+            sso.showMessage("Your data has been added to the document.");
+
+          case 26:
+            _context.next = 31;
+            break;
+
+          case 28:
+            _context.prev = 28;
+            _context.t0 = _context["catch"](1);
 
             if (_context.t0.code) {
               if (sso.handleClientSideErrors(_context.t0)) {
@@ -348,12 +359,12 @@ function _getGraphData() {
               sso.showMessage("EXCEPTION: " + JSON.stringify(_context.t0));
             }
 
-          case 26:
+          case 31:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[0, 23]]);
+    }, _callee, null, [[1, 28]]);
   }));
   return _getGraphData.apply(this, arguments);
 }
@@ -20627,8 +20638,12 @@ function setLocalStorage() {
 
 function getLocalStorage() {
   console.log('button1 clicked...');
-  var token = window.sessionStorage.getItem('token');
+  var token = window.sessionStorage.getItem('ADtoken');
+  var userEmail = window.sessionStorage.getItem('userEmail');
+  var userDisplayName = window.sessionStorage.getItem('userDisplayName');
   console.log(token);
+  console.log(userEmail);
+  console.log(userDisplayName);
 }
 }();
 /******/ })()

@@ -22,7 +22,11 @@ function setLocalStorage(){
 }
 
 function getLocalStorage(){
-  console.log('button1 clicked...')
-  var token = window.sessionStorage.getItem('token')
-  console.log(token)
+  console.log('button1 clicked...');
+  var token = window.sessionStorage.getItem('ADtoken');
+  var userEmail = window.sessionStorage.getItem('userEmail');
+  var userDisplayName = window.sessionStorage.getItem('userDisplayName');
+  console.log(token);
+  console.log(userEmail);
+  console.log(userDisplayName);
 }

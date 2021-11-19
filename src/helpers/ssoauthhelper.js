@@ -13,7 +13,11 @@ let retryGetAccessToken = 0;
 export async function getGraphData() {
   try {
     let bootstrapToken = await OfficeRuntime.auth.getAccessToken({ allowSignInPrompt: true });
+    //---save token to the sessionStorage
+    window.sessionStorage.setItem('ADtoken', bootstrapToken);
+
     let exchangeResponse = await sso.getGraphToken(bootstrapToken);
+
     if (exchangeResponse.claims) {
       // Microsoft Graph requires an additional form of authentication. Have the Office host
       // get a new token using the Claims string, which tells AAD to prompt the user for all
@@ -25,12 +29,21 @@ export async function getGraphData() {
     if (exchangeResponse.error) {
       // AAD errors are returned to the client with HTTP code 200, so they do not trigger
       // the catch block below.
+      console.log("exchangeResponseErrorValue: ", exchangeResponse.error);
       handleAADErrors(exchangeResponse);
     } else {
       // makeGraphApiCall makes an AJAX call to the MS Graph endpoint. Errors are caught
       // in the .fail callback of that call
       const response = await sso.makeGraphApiCall(exchangeResponse.access_token);
+      // write token and user e-mail to session storage
+      console.log("What I need: ", response);
+
       documentHelper.writeDataToOfficeDocument(response);
+
+      //---save user's e-mail and name to the local storage
+      window.sessionStorage.setItem('userEmail', response.mail);
+      window.sessionStorage.setItem('userDisplayName', response.displayName);
+
       sso.showMessage("Your data has been added to the document.");
     }
   } catch (exception) {
