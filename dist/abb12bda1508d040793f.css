@@ -91,3 +91,57 @@
 b {
     font-weight: bold;
 }
+
+.button-group{
+  width: 95%;
+  margin: 10px auto;
+  background-color: white;
+  padding: 2%;
+}
+
+.button{
+  background-color: #2B88D8;
+  color: white;
+  width: 100%;
+  margin: 5px auto;
+  font-size: 12;
+  text-align: center;
+  border-radius: 2px;
+  border-width: 0px;
+}
+
+.step{
+  font-weight: bold;
+  font-size: 14;
+}
+
+.label{
+  font-size: 11;
+}
+
+header{
+  padding: 20px;
+  padding-bottom: 10px;
+  padding-top: 10px;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  align-items: center;
+  background-color: #2B88D8;
+  color: white;
+  margin-bottom: 5px;
+  text-align: center;
+}
+
+.heading{
+  font-size: 18;
+}
+
+.addin-footer{
+  background-color: #2B88D8;
+  color: white;
+  width: 100%;
+  padding: 20px;
+  text-align: center;
+}

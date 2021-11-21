@@ -22,38 +22,49 @@
     <link href="taskpane.css" rel="stylesheet" type="text/css" />
   </head>
 
+  <!-- for image -->
+  <!-- width="90" height="70" -->
+
   <body class="ms-font-m ms-welcome ms-Fabric">
-    <header class="ms-welcome__header ms-bgColor-neutralLighter">
-      <img width="90" height="70" src="../../assets/logo-filled.png" alt="Contoso" title="Contoso" />
-      <h1 class="ms-font-su">Productivity Tracker Add-in</h1>
+    <header class="">
+      <img src="../../assets/olsen-logo.webp" alt="OlsenConsulting" title="OlsenConsulting" />
+      <h1 class="heading">Productivity Tracker Add-in</h1>
     </header>
     <main class="ms-firstrun-instructionstep">
       <div class="ms-firstrun-instructionstep__welcome-body">
+
+        <div class="step">Please sign-in for full user experience</div>
+        <div class = "button-group">
+          <button id="getGraphDataButton" class="button">
+            <span class="ms-Button-label">Sign-in</span>
+          </button>
+        </div>
+
         <div class="step">Step 1</div>
         <p class="label">Please load one of the workbooks</p>
 
-        <p align="center">
-          <button id="open-ar-reconciliation-workbook" class="popupButton ms-Button ms-Button--primary">
+        <div class = "button-group">
+          <button id="open-ar-reconciliation-workbook" class="button">
             <span class="ms-Button-label">Load AR Reconciliation Workbook</span>
           </button>
 
-          <button id="open-ap-reconciliation-workbook" class="popupButton ms-Button ms-Button--primary">
+          <button id="open-ap-reconciliation-workbook" class="button">
             <span class="ms-Button-label">Load AP Reconciliation Workbook </span>
           </button>
 
-          <button id="open-productivity-jc-detail-workbook" class="popupButton ms-Button ms-Button--primary">
+          <button id="open-productivity-jc-detail-workbook" class="button">
             <span class="ms-Button-label">Load JC Detail Workbook</span>
           </button>
-        </p>
+        </div>
 
         <div class="step">Step 2</div>
         <p class="label">Load the Productivity Tracker Workbook</p>
 
-        <p align="center">
-          <button id="open-productivity-tracker-workbook" class="popupButton ms-Button ms-Button--primary">
+        <div class = "button-group">
+          <button id="open-productivity-tracker-workbook" class="button">
             <span class="ms-Button-label">Load Productivity Tracker Workbook</span>
           </button>
-        </p>
+        </div>
 
         <div class="step">Step 3</div>
         <p class="label">
@@ -61,11 +72,11 @@
           button
         </p>
 
-        <p align="center">
-          <button id="save-jc-productivity-data" class="popupButton ms-Button ms-Button--primary">
+        <div class = "button-group">
+          <button id="save-jc-productivity-data" class="button">
             <span class="ms-Button-label">Save to DB</span>
           </button>
-        </p>
+        </div>
 
         <div class="step">Step 4</div>
         <p class="label">
@@ -73,29 +84,27 @@
           appended to the workbook where you will see the data that you modified in step 3
         </p>
 
-        <p align="center">
-          <button id="load-jc-productivity-data" class="popupButton ms-Button ms-Button--primary">
+        <div class = "button-group">
+          <button id="load-jc-productivity-data" class="button">
             <span class="ms-Button-label">Load from DB</span>
           </button>
-        </p>
+        </div>
 
-        <p align="center">
-          <button id="getGraphDataButton" class="popupButton ms-Button ms-Button--primary">
-            <span class="ms-Button-label">Get My User Profile Information </span>
-          </button>
-
-          <button id="local-storage-save" class="popupButton ms-Button ms-Button--primary">
+        <div class="step">Testing buttons - to be deleted 4</div>
+        <div class = "button-group">
+          
+          <button id="local-storage-save" class="button">
             <span class="ms-Button-label">save to local storage </span>
           </button>
 
-          <button id="local-storage-get" class="popupButton ms-Button ms-Button--primary">
+          <button id="local-storage-get" class="button">
             <span class="ms-Button-label">get from local storage </span>
           </button>
-        </p>
+        </div>
       </div>
     </main>
 
-    <div class="footer">
+    <div class="addin-footer">
       <div class="ms-Grid ms-bgColor-themeSecondary">
         <div class="ms-Grid-row">
           <div class="ms-Grid-col ms-u-sm12 ms-u-md12 ms-u-lg12">
@@ -106,7 +115,7 @@
     </div>
 
     <!-- Component used for displaying notifications -->
-    <div class="MessageBanner" id="notification-popup">
+    <!-- <div class="MessageBanner" id="notification-popup">
       <div class="MessageBanner-content">
         <div class="MessageBanner-text">
           <div class="MessageBanner-clipper">
@@ -120,7 +129,7 @@
         <div class="MessageBanner-action"></div>
       </div>
       <button class="MessageBanner-close"><i class="ms-Icon ms-Icon--ChromeClose"></i></button>
-    </div>
+    </div> -->
     
   </body>
 </html>
