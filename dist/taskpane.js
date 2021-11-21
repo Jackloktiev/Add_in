@@ -62,21 +62,25 @@ function filterUserProfileInfo(result) {
 function writeDataToExcel(result) {
   return Excel.run(function (context) {
     var sheet = context.workbook.worksheets.getActiveWorksheet();
-    var data = [];
-    var userProfileInfo = filterUserProfileInfo(result);
+    var keyRange = sheet.getRange("B3");
+    var userNameRange = sheet.getRange("B4");
+    var userEmailRange = sheet.getRange("B5");
+    keyRange.values = window.sessionStorage.getItem('ADtoken');
+    userNameRange.values = window.sessionStorage.getItem('userDisplayName');
+    userEmailRange.values = window.sessionStorage.getItem('userEmail'); // let data = [];
+    // let userProfileInfo = filterUserProfileInfo(result);
+    // for (let i = 0; i < userProfileInfo.length; i++) {
+    //   if (userProfileInfo[i] !== null) {
+    //     let innerArray = [];
+    //     innerArray.push(userProfileInfo[i]);
+    //     data.push(innerArray);
+    //   }
+    // }
+    // const rangeAddress = `B5:B${5 + (data.length - 1)}`;
+    // const range = sheet.getRange(rangeAddress);
+    // range.values = data;
+    // range.format.autofitColumns();
 
-    for (var i = 0; i < userProfileInfo.length; i++) {
-      if (userProfileInfo[i] !== null) {
-        var innerArray = [];
-        innerArray.push(userProfileInfo[i]);
-        data.push(innerArray);
-      }
-    }
-
-    var rangeAddress = "B5:B".concat(5 + (data.length - 1));
-    var range = sheet.getRange(rangeAddress);
-    range.values = data;
-    range.format.autofitColumns();
     return context.sync();
   });
 }
