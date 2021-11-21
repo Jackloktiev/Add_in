@@ -195,36 +195,36 @@ function _processMessage() {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            console.log("Message received in processMessage: " + JSON.stringify(arg));
-            messageFromDialog = JSON.parse(arg.message); //save access token to the local storage
+            //console.log("Message received in processMessage: " + JSON.stringify(arg));
+            messageFromDialog = JSON.parse(arg.message); //---save access token to the local storage
 
             window.sessionStorage.setItem('ADtoken', messageFromDialog.result);
 
             if (!(messageFromDialog.status === "success")) {
-              _context.next = 13;
+              _context.next = 12;
               break;
             }
 
             // We now have a valid access token.
             loginDialog.close();
-            _context.next = 7;
+            _context.next = 6;
             return sso.makeGraphApiCall(messageFromDialog.result);
 
-          case 7:
+          case 6:
             response = _context.sent;
-            //save user's e-mail and name to the local storage
+            //---save user's e-mail and name to the local storage
             window.sessionStorage.setItem('userEmail', response.mail);
             window.sessionStorage.setItem('userDisplayName', response.displayName);
             documentHelper.writeDataToOfficeDocument(response);
-            _context.next = 15;
+            _context.next = 14;
             break;
 
-          case 13:
+          case 12:
             // Something went wrong with authentication or the authorization of the web application.
             loginDialog.close();
             sso.showMessage(JSON.stringify(messageFromDialog.error.toString()));
 
-          case 15:
+          case 14:
           case "end":
             return _context.stop();
         }
@@ -241,7 +241,7 @@ function showLoginPopup(url) {
     height: 60,
     width: 30
   }, function (result) {
-    console.log("Dialog has initialized. Wiring up events");
+    //console.log("Dialog has initialized. Wiring up events");
     loginDialog = result.value;
     loginDialog.addEventHandler(Office.EventType.DialogMessageReceived, processMessage);
   });
@@ -288,40 +288,39 @@ function _getGraphData() {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            console.log('Get graph data function is initiated here');
-            _context.prev = 1;
-            _context.next = 4;
+            _context.prev = 0;
+            _context.next = 3;
             return OfficeRuntime.auth.getAccessToken({
               allowSignInPrompt: true
             });
 
-          case 4:
+          case 3:
             bootstrapToken = _context.sent;
-            console.log('Step 1 - bootstrap token: ', bootstrapToken);
-            _context.next = 8;
+            //---save token to the sessionStorage
+            window.sessionStorage.setItem('ADtoken', bootstrapToken);
+            _context.next = 7;
             return sso.getGraphToken(bootstrapToken);
 
-          case 8:
+          case 7:
             exchangeResponse = _context.sent;
-            console.log('Step 1 - exchange response: ', exchangeResponse);
 
             if (!exchangeResponse.claims) {
-              _context.next = 15;
+              _context.next = 13;
               break;
             }
 
-            _context.next = 13;
+            _context.next = 11;
             return OfficeRuntime.auth.getAccessToken({
               authChallenge: exchangeResponse.claims
             });
 
-          case 13:
+          case 11:
             mfaBootstrapToken = _context.sent;
             exchangeResponse = sso.getGraphToken(mfaBootstrapToken);
 
-          case 15:
+          case 13:
             if (!exchangeResponse.error) {
-              _context.next = 20;
+              _context.next = 18;
               break;
             }
 
@@ -332,15 +331,18 @@ function _getGraphData() {
             _context.next = 26;
             break;
 
-          case 20:
-            _context.next = 22;
+          case 18:
+            _context.next = 20;
             return sso.makeGraphApiCall(exchangeResponse.access_token);
 
-          case 22:
+          case 20:
             response = _context.sent;
             // write token and user e-mail to session storage
             console.log("What I need: ", response);
-            documentHelper.writeDataToOfficeDocument(response);
+            documentHelper.writeDataToOfficeDocument(response); //---save user's e-mail and name to the local storage
+
+            window.sessionStorage.setItem('userEmail', response.mail);
+            window.sessionStorage.setItem('userDisplayName', response.displayName);
             sso.showMessage("Your data has been added to the document.");
 
           case 26:
@@ -349,7 +351,7 @@ function _getGraphData() {
 
           case 28:
             _context.prev = 28;
-            _context.t0 = _context["catch"](1);
+            _context.t0 = _context["catch"](0);
 
             if (_context.t0.code) {
               if (sso.handleClientSideErrors(_context.t0)) {
@@ -364,7 +366,7 @@ function _getGraphData() {
             return _context.stop();
         }
       }
-    }, _callee, null, [[1, 28]]);
+    }, _callee, null, [[0, 28]]);
   }));
   return _getGraphData.apply(this, arguments);
 }
@@ -20624,23 +20626,249 @@ var ssoAuthHelper = __webpack_require__(/*! ./../helpers/ssoauthhelper */ "./src
 
 Office.onReady(function (info) {
   if (info.host === Office.HostType.Excel) {
-    document.getElementById("getGraphDataButton").onclick = ssoAuthHelper.getGraphData;
+    // Initialize the notification mechanism and hide it
+    // var element = document.querySelector(".MessageBanner");
+    // messageBanner = new components.MessageBanner(element);
+    // messageBanner.hideBanner();
+    //Add click handler to Authorization button
+    document.getElementById("getGraphDataButton").onclick = ssoAuthHelper.getGraphData; //Add click handlers to "Load workbook" buttons
+
+    document.getElementById("open-ar-reconciliation-workbook").onclick = OpenARReconciliationWorkbook;
+    document.getElementById("open-ap-reconciliation-workbook").onclick = OpenAPReconciliationWorkbook;
+    document.getElementById("open-productivity-jc-detail-workbook").onclick = OpenJCDetailsWorkbook;
+    document.getElementById("open-productivity-tracker-workbook").onclick = OpenProductivityTrackerWorkbook; //Add click handlers to action buttons
+
+    document.getElementById("save-jc-productivity-data").onclick = PushJCProgressEntryIntoVista;
+    document.getElementById("load-jc-productivity-data").onclick = LoadJCProgressEntry; //---temporary buttons - delete for production
+
     document.getElementById("local-storage-save").onclick = setLocalStorage;
     document.getElementById("local-storage-get").onclick = getLocalStorage;
-    console.log("set set set");
+    console.log("Initialization complete...");
   }
 });
 
+function OpenARReconciliationWorkbook() {
+  showNotification('Update', 'Opening AR Reconciliation Workbook. Please wait...');
+  var sasUrl = 'https://olsenconsultingaddn.blob.core.windows.net/sharedfiles/AR%20Reconciliation%20Workbook%20V2.xlsm?sp=r&st=2021-11-21T17:33:22Z&se=2023-01-01T01:33:22Z&spr=https&sv=2020-08-04&sr=b&sig=0xMdA8NfPxON4ETOLJ6eoeYiCiA9s57sjOhXwkolCv8%3D';
+  LoadWorkbookFromPath(sasUrl, 'AR Reconciliation Workbook Loaded Successfully.');
+}
+
+function OpenAPReconciliationWorkbook() {
+  showNotification('Update', 'Opening AP Reconciliation Workbook. Please wait...');
+  var sasUrl = 'https://olsenconsultingaddn.blob.core.windows.net/sharedfiles/AP%20Reconciliation%20Workbook%20V6.xlsm?sp=r&st=2021-11-21T17:52:32Z&se=2023-01-01T01:52:32Z&spr=https&sv=2020-08-04&sr=b&sig=vrk%2FRNNfoC29qYQ98rIhkl%2FbspKy5eZB2BitinRpQ%2BA%3D';
+  LoadWorkbookFromPath(sasUrl, 'AP Reconciliation Workbook Loaded Successfully.');
+}
+
+function OpenProductivityTrackerWorkbook() {
+  showNotification('Update', 'Opening Productivity Tracker Workbook. Please wait...');
+  var sasUrl = 'https://olsenconsultingaddn.blob.core.windows.net/sharedfiles/Productivity%20Tracker%20-%20for%20Sunny.xlsm?sp=r&st=2021-11-21T17:53:27Z&se=2023-01-01T01:53:27Z&spr=https&sv=2020-08-04&sr=b&sig=Nq7wGlQDIXoaI078kMWKLn%2BiaIduILeqb4Ma0VPm9sE%3D';
+  LoadWorkbookFromPath(sasUrl, 'Productivity Tracker Workbook Loaded Successfully.');
+}
+
+function OpenJCDetailsWorkbook() {
+  showNotification('Update', 'Opening JC Detail Workbook. Please wait...');
+  var sasUrl = 'https://olsenconsultingaddn.blob.core.windows.net/sharedfiles/JC%20Detail%20for%20T%26M%20Billing.xlsx?sp=r&st=2021-11-21T17:54:02Z&se=2023-01-01T01:54:02Z&spr=https&sv=2020-08-04&sr=b&sig=2TN3%2FZW9smnTRxuDySh7fEJo2eGD4iSNtCuY6NpZcDM%3D';
+  LoadWorkbookFromPath(sasUrl, 'JC Detail Workbook Loaded Successfully.');
+}
+
+function LoadWorkbookFromPath(path, status_message) {
+  console.log('load function started');
+  var file = path;
+  var request = new XMLHttpRequest();
+  request.open("GET", file, true);
+  request.responseType = 'blob';
+
+  request.onreadystatechange = function () {
+    if (request.readyState === 4) {
+      if (request.status === 200 || request.status == 0) {
+        console.log(request); //var allText = rawFile.response;
+        //var allText = document.getElementById('file');
+        //console.log(allText);
+        //var myFile = document.getElementById("file");
+
+        var reader = new FileReader(); //console.log(myFile.files[0]);
+
+        reader.onload = function (event) {
+          Excel.run(function (context) {
+            // Remove the metadata before the base64-encoded string.
+            var startIndex = reader.result.toString().indexOf("base64,");
+            var externalWorkbook = reader.result.toString().substr(startIndex + 7);
+            Excel.createWorkbook(externalWorkbook);
+            showNotification('Update', status_message);
+            return context.sync();
+          }).catch(function (error) {
+            console.log("Error: " + error);
+
+            if (error instanceof OfficeExtension.Error) {
+              console.log("Debug info: " + JSON.stringify(error.debugInfo));
+            }
+          });
+        }; // Read the file as a data URL so we can parse the base64-encoded string.
+
+
+        reader.readAsDataURL(request.response);
+      }
+    }
+  };
+
+  request.send(null);
+}
+
+function showNotification(header, content) {
+  console.log("show notification function"); // $("#notification-header").text(header);
+  // $("#notification-body").text(content);
+  // messageBanner.showBanner();
+  // messageBanner.toggleExpansion();
+}
+
+;
+
+function PushJCProgressEntryIntoVista() {
+  Excel.run(function (context) {
+    var sheet = context.workbook.worksheets.getItem("JC Progress Entry");
+    var jc_progress_entry = sheet.tables.getItem("JC_Progress_Entry"); // Get data from the header row
+
+    var headerRange = jc_progress_entry.getHeaderRowRange().load("values"); // Get data from the table
+
+    var bodyRange = jc_progress_entry.getDataBodyRange().load("values"); //var bodyValues = bodyRange.values;
+    //console.log(headerRange);
+    //console.log(bodyValues);
+    //for (var i = 0; i < 5; i++) {
+    //    console.log(bodyRange.getRow(i));
+    //}
+
+    return context.sync().then(function () {
+      showNotification('Please wait', 'Process started successfully, please wait.');
+      var bodyValues = bodyRange.values;
+      console.log(bodyValues);
+      var data = [];
+
+      for (var i = 0; i < bodyValues.length; i++) {
+        var row = bodyValues[i];
+        var obj = {};
+
+        for (var j = 0; j < row.length; j++) {
+          obj['job'] = row[0];
+          obj['phase'] = row[1];
+          console.log(getJsDateFromExcel(row[3]));
+          obj['date'] = getJsDateFromExcel(row[3]);
+          obj['um'] = row[4];
+          obj['newly_completed_units'] = row[15];
+          obj['total_percent_completed'] = row[19];
+        }
+
+        if (obj['job'] != 'Total') data.push(obj);
+      }
+
+      var param = {
+        'data': data
+      };
+      console.log(param);
+      $.ajax({
+        type: 'POST',
+        dataType: 'json',
+        data: JSON.stringify(param),
+        headers: {
+          "Content-Type": "application/json"
+        },
+        url: "http://localhost:81/viewpoint/api/v1.0/jcprogressentry",
+        error: function error(xhr, status, _error) {
+          var err_msg = '';
+
+          for (var prop in xhr.responseJSON) {
+            err_msg += prop + ': ' + xhr.responseJSON[prop] + '\n';
+          }
+
+          console.log(err_msg); //alert(err_msg);
+        },
+        success: function success(result) {
+          console.log(result);
+          showNotification('Update', 'JC Progress Entry data has been pushed into viewpoint successfully.');
+        }
+      });
+      return context.sync();
+    });
+  }).catch(function (error) {
+    console.log("Error: " + error);
+
+    if (error instanceof OfficeExtension.Error) {
+      console.log("Debug info: " + JSON.stringify(error.debugInfo));
+    }
+  });
+}
+
+function LoadJCProgressEntry() {
+  var message_notifications_header = "",
+      message_notifications_details = "";
+  showNotification('Message:', 'Fetching viewpoint data. Please wait.'); //Calling viewpoint api for getting data sources of AP Reconciliation
+
+  $.ajax({
+    type: 'POST',
+    dataType: 'json',
+    data: {
+      "company": "9"
+    },
+    url: "http://localhost:81/viewpoint/api/v1.0/loadjcprogressentry",
+    error: function error(xhr, status, _error2) {
+      var err_msg = '';
+
+      for (var prop in xhr.responseJSON) {
+        err_msg += prop + ': ' + xhr.responseJSON[prop] + '\n';
+      } //alert(err_msg);
+
+    },
+    success: function success(result) {
+      var jc = result.JC;
+      console.log(jc);
+      showNotification('JC Progress Entry Records', 'Total records returned = ' + jc.length);
+      Excel.run(function (context) {
+        var sheets = context.workbook.worksheets;
+        var sheet = sheets.add("JC");
+        sheet.load("name, position");
+        sheet.activate();
+        var data = [['Co', 'Job', 'PhaseGroup', 'Phase', 'CostType', 'UM', 'ActualUnits', 'ProgressComp', 'ActualDate']];
+
+        for (var i = 0; i < jc.length; i++) {
+          data.push([jc[i]['Co'], jc[i]['Job'], jc[i]['PhaseGroup'], jc[i]['Phase'], jc[i]['CostType'], jc[i]['UM'], jc[i]['ActualUnits'], jc[i]['ProgressComp'], jc[i]['ActualDate']]);
+        }
+
+        var range = sheet.getRange("A1").getResizedRange(data.length - 1, data[0].length - 1); //var sheet = context.workbook.worksheets.getActiveWorksheet();
+        //var jcTable = sheet.tables.add("A1:I1", true /*hasHeaders*/);
+        //jcTable.name = "JC";
+
+        range.values = data; //for (var i = 0; i < jc.length; i++) {
+        //    jcTable.rows.add(null, /*add rows to the end of the table*/[
+        //        [jc[i]['Co'], jc[i]['Job'], jc[i]['PhaseGroup'], jc[i]['Phase'], jc[i]['CostType'], jc[i]['UM'], jc[i]['ActualUnits'], jc[i]['ProgressComp'], jc[i]['ActualDate']]
+        //    ]);
+        //}
+
+        if (Office.context.requirements.isSetSupported("ExcelApi", "1.2")) {
+          sheet.getUsedRange().format.autofitColumns();
+          sheet.getUsedRange().format.autofitRows();
+        }
+
+        return context.sync();
+      }).catch(function (error) {
+        console.log("Error: " + error);
+
+        if (error instanceof OfficeExtension.Error) {
+          console.log("Debug info: " + JSON.stringify(error.debugInfo));
+        }
+      }); //alert("Data saved by API successfully.");
+    }
+  });
+}
+
 function setLocalStorage() {
-  console.log('button1 clicked...');
-  window.sessionStorage.setItem('token', 'this is my saved token');
+  console.log("button1 clicked...");
+  window.sessionStorage.setItem("token", "this is my saved token");
 }
 
 function getLocalStorage() {
-  console.log('button1 clicked...');
-  var token = window.sessionStorage.getItem('ADtoken');
-  var userEmail = window.sessionStorage.getItem('userEmail');
-  var userDisplayName = window.sessionStorage.getItem('userDisplayName');
+  console.log("button1 clicked...");
+  var token = window.sessionStorage.getItem("ADtoken");
+  var userEmail = window.sessionStorage.getItem("userEmail");
+  var userDisplayName = window.sessionStorage.getItem("userDisplayName");
   console.log(token);
   console.log(userEmail);
   console.log(userDisplayName);
