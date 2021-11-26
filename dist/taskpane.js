@@ -20645,42 +20645,56 @@ Office.onReady(function (info) {
     document.getElementById("save-jc-productivity-data").onclick = PushJCProgressEntryIntoVista;
     document.getElementById("load-jc-productivity-data").onclick = LoadJCProgressEntry; //---temporary buttons - delete for production
 
-    document.getElementById("local-storage-save").onclick = setLocalStorage;
+    document.getElementById("local-storage-save").onclick = getTemplateFromAuthServer;
     document.getElementById("local-storage-get").onclick = getLocalStorage;
     console.log("Initialization complete...");
   }
 });
 
 function OpenARReconciliationWorkbook() {
-  showNotification('Update', 'Opening AR Reconciliation Workbook. Please wait...');
-  var sasUrl = 'https://olsenconsultingaddn.blob.core.windows.net/sharedfiles/AR%20Reconciliation%20Workbook%20V2.xlsm?sp=r&st=2021-11-21T17:33:22Z&se=2023-01-01T01:33:22Z&spr=https&sv=2020-08-04&sr=b&sig=0xMdA8NfPxON4ETOLJ6eoeYiCiA9s57sjOhXwkolCv8%3D';
-  LoadWorkbookFromPath(sasUrl, 'AR Reconciliation Workbook Loaded Successfully.');
+  showNotification("Update", "Opening AR Reconciliation Workbook. Please wait...");
+  var sasUrl = "https://olsenconsultingaddn.blob.core.windows.net/sharedfiles/AR%20Reconciliation%20Workbook%20V2.xlsm?sp=r&st=2021-11-21T17:33:22Z&se=2023-01-01T01:33:22Z&spr=https&sv=2020-08-04&sr=b&sig=0xMdA8NfPxON4ETOLJ6eoeYiCiA9s57sjOhXwkolCv8%3D";
+  LoadWorkbookFromPath(sasUrl, "AR Reconciliation Workbook Loaded Successfully.");
 }
 
 function OpenAPReconciliationWorkbook() {
-  showNotification('Update', 'Opening AP Reconciliation Workbook. Please wait...');
-  var sasUrl = 'https://olsenconsultingaddn.blob.core.windows.net/sharedfiles/AP%20Reconciliation%20Workbook%20V6.xlsm?sp=r&st=2021-11-21T17:52:32Z&se=2023-01-01T01:52:32Z&spr=https&sv=2020-08-04&sr=b&sig=vrk%2FRNNfoC29qYQ98rIhkl%2FbspKy5eZB2BitinRpQ%2BA%3D';
-  LoadWorkbookFromPath(sasUrl, 'AP Reconciliation Workbook Loaded Successfully.');
+  showNotification("Update", "Opening AP Reconciliation Workbook. Please wait...");
+  var sasUrl = "https://olsenconsultingaddn.blob.core.windows.net/sharedfiles/AP%20Reconciliation%20Workbook%20V6.xlsm?sp=r&st=2021-11-21T17:52:32Z&se=2023-01-01T01:52:32Z&spr=https&sv=2020-08-04&sr=b&sig=vrk%2FRNNfoC29qYQ98rIhkl%2FbspKy5eZB2BitinRpQ%2BA%3D";
+  LoadWorkbookFromPath(sasUrl, "AP Reconciliation Workbook Loaded Successfully.");
 }
 
 function OpenProductivityTrackerWorkbook() {
-  showNotification('Update', 'Opening Productivity Tracker Workbook. Please wait...');
-  var sasUrl = 'https://olsenconsultingaddn.blob.core.windows.net/sharedfiles/Productivity%20Tracker%20-%20for%20Sunny.xlsm?sp=r&st=2021-11-21T17:53:27Z&se=2023-01-01T01:53:27Z&spr=https&sv=2020-08-04&sr=b&sig=Nq7wGlQDIXoaI078kMWKLn%2BiaIduILeqb4Ma0VPm9sE%3D';
-  LoadWorkbookFromPath(sasUrl, 'Productivity Tracker Workbook Loaded Successfully.');
+  showNotification("Update", "Opening Productivity Tracker Workbook. Please wait...");
+  var sasUrl = "https://olsenconsultingaddn.blob.core.windows.net/sharedfiles/Productivity%20Tracker%20-%20for%20Sunny.xlsm?sp=r&st=2021-11-21T17:53:27Z&se=2023-01-01T01:53:27Z&spr=https&sv=2020-08-04&sr=b&sig=Nq7wGlQDIXoaI078kMWKLn%2BiaIduILeqb4Ma0VPm9sE%3D";
+  LoadWorkbookFromPath(sasUrl, "Productivity Tracker Workbook Loaded Successfully.");
 }
 
 function OpenJCDetailsWorkbook() {
-  showNotification('Update', 'Opening JC Detail Workbook. Please wait...');
-  var sasUrl = 'https://olsenconsultingaddn.blob.core.windows.net/sharedfiles/JC%20Detail%20for%20T%26M%20Billing.xlsx?sp=r&st=2021-11-21T17:54:02Z&se=2023-01-01T01:54:02Z&spr=https&sv=2020-08-04&sr=b&sig=2TN3%2FZW9smnTRxuDySh7fEJo2eGD4iSNtCuY6NpZcDM%3D';
-  LoadWorkbookFromPath(sasUrl, 'JC Detail Workbook Loaded Successfully.');
+  showNotification("Update", "Opening JC Detail Workbook. Please wait...");
+  var sasUrl = "https://olsenconsultingaddn.blob.core.windows.net/sharedfiles/JC%20Detail%20for%20T%26M%20Billing.xlsx?sp=r&st=2021-11-21T17:54:02Z&se=2023-01-01T01:54:02Z&spr=https&sv=2020-08-04&sr=b&sig=2TN3%2FZW9smnTRxuDySh7fEJo2eGD4iSNtCuY6NpZcDM%3D";
+  LoadWorkbookFromPath(sasUrl, "JC Detail Workbook Loaded Successfully.");
+}
+
+function getTemplateFromAuthServer() {
+  console.log("Getting Excel template from Auth server...");
+  var Http = new XMLHttpRequest();
+  var url = "http://localhost:8000/gettemplate/?file='progress_entry'";
+  Http.open("GET", url);
+  console.log(sessionStorage.getItem("ADtoken"));
+  Http.setRequestHeader("Authorization", sessionStorage.getItem("ADtoken"));
+  Http.send();
+
+  Http.onreadystatechange = function (e) {
+    console.log(Http.responseText);
+  };
 }
 
 function LoadWorkbookFromPath(path, status_message) {
-  console.log('load function started');
+  console.log("load function started");
   var file = path;
   var request = new XMLHttpRequest();
   request.open("GET", file, true);
-  request.responseType = 'blob';
+  request.responseType = "blob";
 
   request.onreadystatechange = function () {
     if (request.readyState === 4) {
@@ -20698,7 +20712,7 @@ function LoadWorkbookFromPath(path, status_message) {
             var startIndex = reader.result.toString().indexOf("base64,");
             var externalWorkbook = reader.result.toString().substr(startIndex + 7);
             Excel.createWorkbook(externalWorkbook);
-            showNotification('Update', status_message);
+            showNotification("Update", status_message);
             return context.sync();
           }).catch(function (error) {
             console.log("Error: " + error);
@@ -20725,8 +20739,6 @@ function showNotification(header, content) {
   // messageBanner.toggleExpansion();
 }
 
-;
-
 function PushJCProgressEntryIntoVista() {
   Excel.run(function (context) {
     var sheet = context.workbook.worksheets.getItem("JC Progress Entry");
@@ -20742,7 +20754,7 @@ function PushJCProgressEntryIntoVista() {
     //}
 
     return context.sync().then(function () {
-      showNotification('Please wait', 'Process started successfully, please wait.');
+      showNotification("Please wait", "Process started successfully, please wait.");
       var bodyValues = bodyRange.values;
       console.log(bodyValues);
       var data = [];
@@ -20752,42 +20764,42 @@ function PushJCProgressEntryIntoVista() {
         var obj = {};
 
         for (var j = 0; j < row.length; j++) {
-          obj['job'] = row[0];
-          obj['phase'] = row[1];
+          obj["job"] = row[0];
+          obj["phase"] = row[1];
           console.log(getJsDateFromExcel(row[3]));
-          obj['date'] = getJsDateFromExcel(row[3]);
-          obj['um'] = row[4];
-          obj['newly_completed_units'] = row[15];
-          obj['total_percent_completed'] = row[19];
+          obj["date"] = getJsDateFromExcel(row[3]);
+          obj["um"] = row[4];
+          obj["newly_completed_units"] = row[15];
+          obj["total_percent_completed"] = row[19];
         }
 
-        if (obj['job'] != 'Total') data.push(obj);
+        if (obj["job"] != "Total") data.push(obj);
       }
 
       var param = {
-        'data': data
+        data: data
       };
       console.log(param);
       $.ajax({
-        type: 'POST',
-        dataType: 'json',
+        type: "POST",
+        dataType: "json",
         data: JSON.stringify(param),
         headers: {
           "Content-Type": "application/json"
         },
         url: "http://localhost:81/viewpoint/api/v1.0/jcprogressentry",
         error: function error(xhr, status, _error) {
-          var err_msg = '';
+          var err_msg = "";
 
           for (var prop in xhr.responseJSON) {
-            err_msg += prop + ': ' + xhr.responseJSON[prop] + '\n';
+            err_msg += prop + ": " + xhr.responseJSON[prop] + "\n";
           }
 
           console.log(err_msg); //alert(err_msg);
         },
         success: function success(result) {
           console.log(result);
-          showNotification('Update', 'JC Progress Entry data has been pushed into viewpoint successfully.');
+          showNotification("Update", "JC Progress Entry data has been pushed into viewpoint successfully.");
         }
       });
       return context.sync();
@@ -20804,36 +20816,36 @@ function PushJCProgressEntryIntoVista() {
 function LoadJCProgressEntry() {
   var message_notifications_header = "",
       message_notifications_details = "";
-  showNotification('Message:', 'Fetching viewpoint data. Please wait.'); //Calling viewpoint api for getting data sources of AP Reconciliation
+  showNotification("Message:", "Fetching viewpoint data. Please wait."); //Calling viewpoint api for getting data sources of AP Reconciliation
 
   $.ajax({
-    type: 'POST',
-    dataType: 'json',
+    type: "POST",
+    dataType: "json",
     data: {
-      "company": "9"
+      company: "9"
     },
     url: "http://localhost:81/viewpoint/api/v1.0/loadjcprogressentry",
     error: function error(xhr, status, _error2) {
-      var err_msg = '';
+      var err_msg = "";
 
       for (var prop in xhr.responseJSON) {
-        err_msg += prop + ': ' + xhr.responseJSON[prop] + '\n';
+        err_msg += prop + ": " + xhr.responseJSON[prop] + "\n";
       } //alert(err_msg);
 
     },
     success: function success(result) {
       var jc = result.JC;
       console.log(jc);
-      showNotification('JC Progress Entry Records', 'Total records returned = ' + jc.length);
+      showNotification("JC Progress Entry Records", "Total records returned = " + jc.length);
       Excel.run(function (context) {
         var sheets = context.workbook.worksheets;
         var sheet = sheets.add("JC");
         sheet.load("name, position");
         sheet.activate();
-        var data = [['Co', 'Job', 'PhaseGroup', 'Phase', 'CostType', 'UM', 'ActualUnits', 'ProgressComp', 'ActualDate']];
+        var data = [["Co", "Job", "PhaseGroup", "Phase", "CostType", "UM", "ActualUnits", "ProgressComp", "ActualDate"]];
 
         for (var i = 0; i < jc.length; i++) {
-          data.push([jc[i]['Co'], jc[i]['Job'], jc[i]['PhaseGroup'], jc[i]['Phase'], jc[i]['CostType'], jc[i]['UM'], jc[i]['ActualUnits'], jc[i]['ProgressComp'], jc[i]['ActualDate']]);
+          data.push([jc[i]["Co"], jc[i]["Job"], jc[i]["PhaseGroup"], jc[i]["Phase"], jc[i]["CostType"], jc[i]["UM"], jc[i]["ActualUnits"], jc[i]["ProgressComp"], jc[i]["ActualDate"]]);
         }
 
         var range = sheet.getRange("A1").getResizedRange(data.length - 1, data[0].length - 1); //var sheet = context.workbook.worksheets.getActiveWorksheet();
