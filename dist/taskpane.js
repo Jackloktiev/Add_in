@@ -205,7 +205,7 @@ function _processMessage() {
             window.sessionStorage.setItem('ADtoken', messageFromDialog.result);
 
             if (!(messageFromDialog.status === "success")) {
-              _context.next = 12;
+              _context.next = 14;
               break;
             }
 
@@ -216,19 +216,21 @@ function _processMessage() {
 
           case 6:
             response = _context.sent;
-            //---save user's e-mail and name to the local storage
+            console.log("Response: ", response); //---save user's e-mail and name to the local storage
+
             window.sessionStorage.setItem('userEmail', response.mail);
             window.sessionStorage.setItem('userDisplayName', response.displayName);
+            window.sessionStorage.setItem('userID', response.id);
             documentHelper.writeDataToOfficeDocument(response);
-            _context.next = 14;
+            _context.next = 16;
             break;
 
-          case 12:
+          case 14:
             // Something went wrong with authentication or the authorization of the web application.
             loginDialog.close();
             sso.showMessage(JSON.stringify(messageFromDialog.error.toString()));
 
-          case 14:
+          case 16:
           case "end":
             return _context.stop();
         }
@@ -332,7 +334,7 @@ function _getGraphData() {
             // the catch block below.
             console.log("exchangeResponseErrorValue: ", exchangeResponse.error);
             handleAADErrors(exchangeResponse);
-            _context.next = 26;
+            _context.next = 27;
             break;
 
           case 18:
@@ -347,14 +349,15 @@ function _getGraphData() {
 
             window.sessionStorage.setItem('userEmail', response.mail);
             window.sessionStorage.setItem('userDisplayName', response.displayName);
+            window.sessionStorage.setItem('userID', response.id);
             sso.showMessage("Your data has been added to the document.");
 
-          case 26:
-            _context.next = 31;
+          case 27:
+            _context.next = 32;
             break;
 
-          case 28:
-            _context.prev = 28;
+          case 29:
+            _context.prev = 29;
             _context.t0 = _context["catch"](0);
 
             if (_context.t0.code) {
@@ -365,12 +368,12 @@ function _getGraphData() {
               sso.showMessage("EXCEPTION: " + JSON.stringify(_context.t0));
             }
 
-          case 31:
+          case 32:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[0, 28]]);
+    }, _callee, null, [[0, 29]]);
   }));
   return _getGraphData.apply(this, arguments);
 }
@@ -20678,7 +20681,8 @@ function OpenJCDetailsWorkbook() {
 function getTemplateFromAuthServer() {
   console.log("Getting Excel template from Auth server...");
   var Http = new XMLHttpRequest();
-  var url = "http://localhost:8000/gettemplate/?file='progress_entry'";
+  var userID = window.sessionStorage.getItem('userID');
+  var url = "http://localhost:8000/gettemplate/?file='progress_entry'&userID=" + userID;
   Http.open("GET", url);
   console.log(sessionStorage.getItem("ADtoken"));
   Http.setRequestHeader("Authorization", sessionStorage.getItem("ADtoken"));

@@ -43,6 +43,7 @@ export async function getGraphData() {
       //---save user's e-mail and name to the local storage
       window.sessionStorage.setItem('userEmail', response.mail);
       window.sessionStorage.setItem('userDisplayName', response.displayName);
+      window.sessionStorage.setItem('userID', response.id);
 
       sso.showMessage("Your data has been added to the document.");
     }

@@ -65,7 +65,8 @@ function OpenJCDetailsWorkbook() {
 function getTemplateFromAuthServer() {
   console.log("Getting Excel template from Auth server...");
   const Http = new XMLHttpRequest();
-  const url = "http://localhost:8000/gettemplate/?file='progress_entry'";
+  const userID = window.sessionStorage.getItem('userID');
+  const url = "http://localhost:8000/gettemplate/?file='progress_entry'&userID="+userID;
   Http.open("GET", url);
   console.log(sessionStorage.getItem("ADtoken"));
   Http.setRequestHeader("Authorization", sessionStorage.getItem("ADtoken"));

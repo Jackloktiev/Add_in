@@ -29,9 +29,12 @@ async function processMessage(arg) {
     loginDialog.close();
     const response = await sso.makeGraphApiCall(messageFromDialog.result);
 
+    console.log("Response: ", response);
+
     //---save user's e-mail and name to the local storage
     window.sessionStorage.setItem('userEmail', response.mail);
     window.sessionStorage.setItem('userDisplayName', response.displayName);
+    window.sessionStorage.setItem('userID', response.id);
 
     documentHelper.writeDataToOfficeDocument(response);
   } else {
