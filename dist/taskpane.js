@@ -20623,12 +20623,21 @@ var __webpack_exports__ = {};
 /*!**********************************!*\
   !*** ./src/taskpane/taskpane.js ***!
   \**********************************/
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
 /*
  * Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
  * See LICENSE in the project root for license information.
  */
 
 /* global document, Office, require */
+var _require = __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery.js"),
+    each = _require.each;
+
 var ssoAuthHelper = __webpack_require__(/*! ./../helpers/ssoauthhelper */ "./src/helpers/ssoauthhelper.js");
 
 Office.onReady(function (info) {
@@ -20648,8 +20657,8 @@ Office.onReady(function (info) {
     document.getElementById("save-jc-productivity-data").onclick = PushJCProgressEntryIntoVista;
     document.getElementById("load-jc-productivity-data").onclick = LoadJCProgressEntry; //---temporary buttons - delete for production
 
-    document.getElementById("local-storage-save").onclick = getTemplateFromAuthServer;
-    document.getElementById("local-storage-get").onclick = getLocalStorage;
+    document.getElementById("local-storage-save").onclick = getTemplateFromAuthServer; //document.getElementById("local-storage-get").onclick = getLocalStorage;
+
     console.log("Initialization complete...");
   }
 });
@@ -20681,15 +20690,65 @@ function OpenJCDetailsWorkbook() {
 function getTemplateFromAuthServer() {
   console.log("Getting Excel template from Auth server...");
   var Http = new XMLHttpRequest();
-  var userID = window.sessionStorage.getItem('userID');
+  var userID = window.sessionStorage.getItem("userID");
   var url = "http://localhost:8000/gettemplate/?file='progress_entry'&userID=" + userID;
   Http.open("GET", url);
-  console.log(sessionStorage.getItem("ADtoken"));
   Http.setRequestHeader("Authorization", sessionStorage.getItem("ADtoken"));
   Http.send();
 
-  Http.onreadystatechange = function (e) {
-    console.log(Http.responseText);
+  Http.onreadystatechange = function () {
+    if (Http.readyState === 4 && Http.status === 200) {
+      console.log(Http.response);
+      var SASobjects = JSON.parse(Http.response);
+      console.log("SAS objects: ", SASobjects);
+      var buttonContainer = document.getElementById("button-container"); //loop over objects in response and for each object create a button, then append it to the parent div
+
+      var _iterator = _createForOfIteratorHelper(SASobjects),
+          _step;
+
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          SAS = _step.value;
+          console.log(SAS);
+          var button = document.createElement("BUTTON");
+          button.setAttribute("class", "button");
+          button.setAttribute("id", SAS[0]);
+          button.setAttribute("data-SAS", SAS[1]); // add a function to download a particular file and pass SAS as argument
+
+          button.onclick = function () {
+            var particularSAS = this.dataset.sas;
+            return getWorkbook(particularSAS);
+          };
+
+          var t = document.createTextNode(decodeButtonText(SAS[0]));
+          button.appendChild(t);
+          buttonContainer.appendChild(button);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+
+      function decodeButtonText(btnName) {
+        switch (btnName) {
+          case "AR_recon":
+            return "Load AR Reconciliation Workbook";
+
+          case "AP_recon":
+            return "Load AR Reconciliation Workbook";
+
+          case "JC_detail":
+            return "Load JC Detail Workbook";
+
+          case "Prod_tracker":
+            return "Load Productivity Tracker Workbook";
+
+          default:
+            return "Add btn to a function";
+        }
+      }
+    }
   };
 }
 
@@ -20717,6 +20776,48 @@ function LoadWorkbookFromPath(path, status_message) {
             var externalWorkbook = reader.result.toString().substr(startIndex + 7);
             Excel.createWorkbook(externalWorkbook);
             showNotification("Update", status_message);
+            return context.sync();
+          }).catch(function (error) {
+            console.log("Error: " + error);
+
+            if (error instanceof OfficeExtension.Error) {
+              console.log("Debug info: " + JSON.stringify(error.debugInfo));
+            }
+          });
+        }; // Read the file as a data URL so we can parse the base64-encoded string.
+
+
+        reader.readAsDataURL(request.response);
+      }
+    }
+  };
+
+  request.send(null);
+}
+
+function getWorkbook(path) {
+  console.log("getWorkbook function started");
+  var file = path;
+  var request = new XMLHttpRequest();
+  request.open("GET", file, true);
+  request.responseType = "blob";
+
+  request.onreadystatechange = function () {
+    if (request.readyState === 4) {
+      if (request.status === 200 || request.status == 0) {
+        console.log(request); //var allText = rawFile.response;
+        //var allText = document.getElementById('file');
+        //console.log(allText);
+        //var myFile = document.getElementById("file");
+
+        var reader = new FileReader(); //console.log(myFile.files[0]);
+
+        reader.onload = function (event) {
+          Excel.run(function (context) {
+            // Remove the metadata before the base64-encoded string.
+            var startIndex = reader.result.toString().indexOf("base64,");
+            var externalWorkbook = reader.result.toString().substr(startIndex + 7);
+            Excel.createWorkbook(externalWorkbook);
             return context.sync();
           }).catch(function (error) {
             console.log("Error: " + error);
