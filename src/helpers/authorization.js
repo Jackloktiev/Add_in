@@ -9,6 +9,9 @@ export function authorizeUser() {
 
   Http.onreadystatechange = () => {
     if (Http.readyState === 4 && Http.status === 200) {
+        let warningMessave = document.getElementById("warningText");
+        warningMessave.setAttribute("class","warning hidden");
+        warningMessave.innerHTML = "";
 
       let SASobjects = JSON.parse(Http.response);
 
@@ -24,7 +27,7 @@ export function authorizeUser() {
           let particularSAS = this.dataset.sas;
           return getWorkbook(particularSAS);
         };
-        var t = document.createTextNode(decodeButtonText(SAS[0]));
+        let t = document.createTextNode(decodeButtonText(SAS[0]));
         button.appendChild(t);
         buttonContainer.appendChild(button);
         let pushPullContainer = document.getElementById("push-pull-container");
@@ -47,6 +50,21 @@ export function authorizeUser() {
       }
 
       return;
+    }else if(Http.readyState === 4 && Http.status === 600){
+        //show message "User not authorizedr"
+        let warningMessave = document.getElementById("warningText");
+        warningMessave.setAttribute("class","warning");
+        warningMessave.innerHTML="User not authorized. Please contact Olsen Consulting "
+        // let t = document.createTextNode("User not authorized. Please contact Olsen Consulting ");
+        // warningMessave.appendChild(t);
+    }else{
+        console.log( Http.status)
+        //show message "Authentication server error"
+        let warningMessave = document.getElementById("warningText");
+        warningMessave.setAttribute("class","warning");
+        warningMessave.innerHTML = "Authentication server error ";
+        // let t = document.createTextNode("Authentication server error ");
+        // warningMessave.appendChild(t);
     }
   };
 }

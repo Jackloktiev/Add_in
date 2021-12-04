@@ -28,6 +28,9 @@ function authorizeUser() {
 
   Http.onreadystatechange = function () {
     if (Http.readyState === 4 && Http.status === 200) {
+      var warningMessave = document.getElementById("warningText");
+      warningMessave.setAttribute("class", "warning hidden");
+      warningMessave.innerHTML = "";
       var SASobjects = JSON.parse(Http.response);
       var buttonContainer = document.getElementById("button-container"); //loop over objects in response and for each object create a button, then append it to the parent div
 
@@ -79,6 +82,23 @@ function authorizeUser() {
       }
 
       return;
+    } else if (Http.readyState === 4 && Http.status === 600) {
+      //show message "User not authorizedr"
+      var _warningMessave = document.getElementById("warningText");
+
+      _warningMessave.setAttribute("class", "warning");
+
+      _warningMessave.innerHTML = "User not authorized. Please contact Olsen Consulting "; // let t = document.createTextNode("User not authorized. Please contact Olsen Consulting ");
+      // warningMessave.appendChild(t);
+    } else {
+      console.log(Http.status); //show message "Authentication server error"
+
+      var _warningMessave2 = document.getElementById("warningText");
+
+      _warningMessave2.setAttribute("class", "warning");
+
+      _warningMessave2.innerHTML = "Authentication server error "; // let t = document.createTextNode("Authentication server error ");
+      // warningMessave.appendChild(t);
     }
   };
 }
