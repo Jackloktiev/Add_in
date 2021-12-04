@@ -6,6 +6,7 @@
 /* global console, location, Office, require */
 const documentHelper = require("./documentHelper");
 const sso = require("office-addin-sso");
+const authModule = require("./authorization");
 var loginDialog;
 
 export function dialogFallback() {
@@ -17,7 +18,6 @@ export function dialogFallback() {
 // This handler responds to the success or failure message that the pop-up dialog receives from the identity provider
 // and access token provider.
 async function processMessage(arg) {
-  //console.log("Message received in processMessage: " + JSON.stringify(arg));
  
   let messageFromDialog = JSON.parse(arg.message);
   
@@ -29,14 +29,19 @@ async function processMessage(arg) {
     loginDialog.close();
     const response = await sso.makeGraphApiCall(messageFromDialog.result);
 
-    console.log("Response: ", response);
+    //console.log("Response: ", response);
 
     //---save user's e-mail and name to the local storage
     window.sessionStorage.setItem('userEmail', response.mail);
     window.sessionStorage.setItem('userDisplayName', response.displayName);
     window.sessionStorage.setItem('userID', response.id);
 
-    documentHelper.writeDataToOfficeDocument(response);
+    //documentHelper.writeDataToOfficeDocument(response);
+
+    authModule.authorizeUser();
+
+
+
   } else {
     // Something went wrong with authentication or the authorization of the web application.
     loginDialog.close();
@@ -50,7 +55,6 @@ function showLoginPopup(url) {
 
   // height and width are percentages of the size of the parent Office application, e.g., PowerPoint, Excel, Word, etc.
   Office.context.ui.displayDialogAsync(fullUrl, { height: 60, width: 30 }, function (result) {
-    //console.log("Dialog has initialized. Wiring up events");
     loginDialog = result.value;
     loginDialog.addEventHandler(Office.EventType.DialogMessageReceived, processMessage);
   });

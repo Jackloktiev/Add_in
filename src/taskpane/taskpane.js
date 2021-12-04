@@ -5,201 +5,22 @@
 
 /* global document, Office, require */
 
-const { each } = require("jquery");
 const ssoAuthHelper = require("./../helpers/ssoauthhelper");
 
 Office.onReady((info) => {
   if (info.host === Office.HostType.Excel) {
-    // Initialize the notification mechanism and hide it
-    // var element = document.querySelector(".MessageBanner");
-    // messageBanner = new components.MessageBanner(element);
-    // messageBanner.hideBanner();
 
     //Add click handler to Authorization button
     document.getElementById("getGraphDataButton").onclick = ssoAuthHelper.getGraphData;
-
-    //Add click handlers to "Load workbook" buttons
-    document.getElementById("open-ar-reconciliation-workbook").onclick = OpenARReconciliationWorkbook;
-    document.getElementById("open-ap-reconciliation-workbook").onclick = OpenAPReconciliationWorkbook;
-    document.getElementById("open-productivity-jc-detail-workbook").onclick = OpenJCDetailsWorkbook;
-    document.getElementById("open-productivity-tracker-workbook").onclick = OpenProductivityTrackerWorkbook;
 
     //Add click handlers to action buttons
     document.getElementById("save-jc-productivity-data").onclick = PushJCProgressEntryIntoVista;
     document.getElementById("load-jc-productivity-data").onclick = LoadJCProgressEntry;
 
-    //---temporary buttons - delete for production
-    document.getElementById("local-storage-save").onclick = getTemplateFromAuthServer;
-    //document.getElementById("local-storage-get").onclick = getLocalStorage;
-    console.log("Initialization complete...");
   }
 });
 
-function OpenARReconciliationWorkbook() {
-  showNotification("Update", "Opening AR Reconciliation Workbook. Please wait...");
-  const sasUrl =
-    "https://olsenconsultingaddn.blob.core.windows.net/sharedfiles/AR%20Reconciliation%20Workbook%20V2.xlsm?sp=r&st=2021-11-21T17:33:22Z&se=2023-01-01T01:33:22Z&spr=https&sv=2020-08-04&sr=b&sig=0xMdA8NfPxON4ETOLJ6eoeYiCiA9s57sjOhXwkolCv8%3D";
-  LoadWorkbookFromPath(sasUrl, "AR Reconciliation Workbook Loaded Successfully.");
-}
 
-function OpenAPReconciliationWorkbook() {
-  showNotification("Update", "Opening AP Reconciliation Workbook. Please wait...");
-  const sasUrl =
-    "https://olsenconsultingaddn.blob.core.windows.net/sharedfiles/AP%20Reconciliation%20Workbook%20V6.xlsm?sp=r&st=2021-11-21T17:52:32Z&se=2023-01-01T01:52:32Z&spr=https&sv=2020-08-04&sr=b&sig=vrk%2FRNNfoC29qYQ98rIhkl%2FbspKy5eZB2BitinRpQ%2BA%3D";
-  LoadWorkbookFromPath(sasUrl, "AP Reconciliation Workbook Loaded Successfully.");
-}
-
-function OpenProductivityTrackerWorkbook() {
-  showNotification("Update", "Opening Productivity Tracker Workbook. Please wait...");
-  const sasUrl =
-    "https://olsenconsultingaddn.blob.core.windows.net/sharedfiles/Productivity%20Tracker%20-%20for%20Sunny.xlsm?sp=r&st=2021-11-21T17:53:27Z&se=2023-01-01T01:53:27Z&spr=https&sv=2020-08-04&sr=b&sig=Nq7wGlQDIXoaI078kMWKLn%2BiaIduILeqb4Ma0VPm9sE%3D";
-  LoadWorkbookFromPath(sasUrl, "Productivity Tracker Workbook Loaded Successfully.");
-}
-
-function OpenJCDetailsWorkbook() {
-  showNotification("Update", "Opening JC Detail Workbook. Please wait...");
-  const sasUrl =
-    "https://olsenconsultingaddn.blob.core.windows.net/sharedfiles/JC%20Detail%20for%20T%26M%20Billing.xlsx?sp=r&st=2021-11-21T17:54:02Z&se=2023-01-01T01:54:02Z&spr=https&sv=2020-08-04&sr=b&sig=2TN3%2FZW9smnTRxuDySh7fEJo2eGD4iSNtCuY6NpZcDM%3D";
-  LoadWorkbookFromPath(sasUrl, "JC Detail Workbook Loaded Successfully.");
-}
-
-
-function getTemplateFromAuthServer() {
-  console.log("Getting Excel template from Auth server...");
-  const Http = new XMLHttpRequest();
-  const userID = window.sessionStorage.getItem("userID");
-  const url = "http://localhost:8000/gettemplate/?file='progress_entry'&userID=" + userID;
-  Http.open("GET", url);
-  Http.setRequestHeader("Authorization", sessionStorage.getItem("ADtoken"));
-  Http.send();
-
-  Http.onreadystatechange = () => {
-    if (Http.readyState === 4 && Http.status === 200) {
-      console.log(Http.response);
-      let SASobjects = JSON.parse(Http.response);
-
-      console.log("SAS objects: ", SASobjects);
-      const buttonContainer = document.getElementById("button-container");
-      //loop over objects in response and for each object create a button, then append it to the parent div
-      for (SAS of SASobjects) {
-        console.log(SAS);
-        let button = document.createElement("BUTTON");
-        button.setAttribute("class","button")
-        button.setAttribute("id",SAS[0])
-        button.setAttribute("data-SAS",SAS[1])
-        // add a function to download a particular file and pass SAS as argument
-        button.onclick = function(){
-          let particularSAS = this.dataset.sas
-          return getWorkbook(particularSAS)
-        }
-        var t = document.createTextNode(decodeButtonText(SAS[0]));
-        button.appendChild(t);
-        buttonContainer.appendChild(button);
-      }
-
-      function decodeButtonText(btnName){
-        switch(btnName){
-          case "AR_recon":
-            return "Load AR Reconciliation Workbook"
-          case "AP_recon":
-            return "Load AR Reconciliation Workbook"
-          case "JC_detail":
-            return "Load JC Detail Workbook"
-          case "Prod_tracker":
-            return "Load Productivity Tracker Workbook"
-          default:
-            return "Add btn to a function"
-        }
-      }
-
-    }
-  };
-}
-
-function LoadWorkbookFromPath(path, status_message) {
-  console.log("load function started");
-  var file = path;
-  var request = new XMLHttpRequest();
-  request.open("GET", file, true);
-  request.responseType = "blob";
-  request.onreadystatechange = function () {
-    if (request.readyState === 4) {
-      if (request.status === 200 || request.status == 0) {
-        console.log(request);
-        //var allText = rawFile.response;
-        //var allText = document.getElementById('file');
-        //console.log(allText);
-
-        //var myFile = document.getElementById("file");
-        var reader = new FileReader();
-        //console.log(myFile.files[0]);
-
-        reader.onload = function (event) {
-          Excel.run(function (context) {
-            // Remove the metadata before the base64-encoded string.
-            var startIndex = reader.result.toString().indexOf("base64,");
-            var externalWorkbook = reader.result.toString().substr(startIndex + 7);
-
-            Excel.createWorkbook(externalWorkbook);
-            showNotification("Update", status_message);
-            return context.sync();
-          }).catch(function (error) {
-            console.log("Error: " + error);
-            if (error instanceof OfficeExtension.Error) {
-              console.log("Debug info: " + JSON.stringify(error.debugInfo));
-            }
-          });
-        };
-
-        // Read the file as a data URL so we can parse the base64-encoded string.
-        reader.readAsDataURL(request.response);
-      }
-    }
-  };
-  request.send(null);
-}
-
-function getWorkbook(path) {
-  console.log("getWorkbook function started");
-  var file = path;
-  var request = new XMLHttpRequest();
-  request.open("GET", file, true);
-  request.responseType = "blob";
-  request.onreadystatechange = function () {
-    if (request.readyState === 4) {
-      if (request.status === 200 || request.status == 0) {
-        console.log(request);
-        //var allText = rawFile.response;
-        //var allText = document.getElementById('file');
-        //console.log(allText);
-
-        //var myFile = document.getElementById("file");
-        var reader = new FileReader();
-        //console.log(myFile.files[0]);
-
-        reader.onload = function (event) {
-          Excel.run(function (context) {
-            // Remove the metadata before the base64-encoded string.
-            var startIndex = reader.result.toString().indexOf("base64,");
-            var externalWorkbook = reader.result.toString().substr(startIndex + 7);
-
-            Excel.createWorkbook(externalWorkbook);
-            return context.sync();
-          }).catch(function (error) {
-            console.log("Error: " + error);
-            if (error instanceof OfficeExtension.Error) {
-              console.log("Debug info: " + JSON.stringify(error.debugInfo));
-            }
-          });
-        };
-
-        // Read the file as a data URL so we can parse the base64-encoded string.
-        reader.readAsDataURL(request.response);
-      }
-    }
-  };
-  request.send(null);
-}
 
 function showNotification(header, content) {
   console.log("show notification function");
@@ -361,17 +182,3 @@ function LoadJCProgressEntry() {
   });
 }
 
-function setLocalStorage() {
-  console.log("button1 clicked...");
-  window.sessionStorage.setItem("token", "this is my saved token");
-}
-
-function getLocalStorage() {
-  console.log("button1 clicked...");
-  var token = window.sessionStorage.getItem("ADtoken");
-  var userEmail = window.sessionStorage.getItem("userEmail");
-  var userDisplayName = window.sessionStorage.getItem("userDisplayName");
-  console.log(token);
-  console.log(userEmail);
-  console.log(userDisplayName);
-}

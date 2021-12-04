@@ -15,6 +15,9 @@
       href="https://static2.sharepointonline.com/files/fabric/office-ui-fabric-core/9.6.1/css/fabric.min.css"
     />
 
+    <!-- We don't need favicon sice it is opening in the side pane not in the browser -->
+    <!-- <link rel="shortcut icon" href=""> -->
+
     <!-- Load the Office JavaScript APIs -->
     <script src="https://appsforoffice.microsoft.com/lib/beta/hosted/office.js" type="text/javascript"></script>
 
@@ -32,79 +35,45 @@
     </header>
     <main class="ms-firstrun-instructionstep">
       <div class="ms-firstrun-instructionstep__welcome-body">
-
         <div class="step">Please sign-in for full user experience</div>
-        <div class = "button-group">
+        <div class="button-group">
           <button id="getGraphDataButton" class="button">
             <span class="ms-Button-label">Sign-in</span>
           </button>
         </div>
 
-        <div id="button-container" class = "button-container">
-          
-        </div>
+        
 
-        <div class="step">Step 1</div>
-        <p class="label">Please load one of the workbooks</p>
+        <div id="push-pull-container" class="button-container hidden">
 
-        <div class = "button-group">
-          <button id="open-ar-reconciliation-workbook" class="button">
-            <span class="ms-Button-label">Load AR Reconciliation Workbook</span>
-          </button>
+          <div class="step">Step 1</div>
+          <p class="label">Please load one of the workbooks</p>
 
-          <button id="open-ap-reconciliation-workbook" class="button">
-            <span class="ms-Button-label">Load AP Reconciliation Workbook </span>
-          </button>
+          <div id="button-container" class="button-container"></div>
 
-          <button id="open-productivity-jc-detail-workbook" class="button">
-            <span class="ms-Button-label">Load JC Detail Workbook</span>
-          </button>
-        </div>
+          <div class="step">Step 2</div>
+          <p class="label">
+            Update any value on JC Progress Entry sheet on columns: A, B, D, E, P and T. And then click the Save to DB
+            button
+          </p>
 
-        <div class="step">Step 2</div>
-        <p class="label">Load the Productivity Tracker Workbook</p>
+          <div class="button-group">
+            <button id="save-jc-productivity-data" class="button">
+              <span class="ms-Button-label">Save to DB</span>
+            </button>
+          </div>
 
-        <div class = "button-group">
-          <button id="open-productivity-tracker-workbook" class="button">
-            <span class="ms-Button-label">Load Productivity Tracker Workbook</span>
-          </button>
-        </div>
+          <div class="step">Step 3</div>
+          <p class="label">
+            You can check the data you entered previously. Please click the Load from DB button. A new sheet will be
+            appended to the workbook where you will see the data that you modified in step 3
+          </p>
 
-        <div class="step">Step 3</div>
-        <p class="label">
-          Update any value on JC Progress Entry sheet on columns: A, B, D, E, P and T. And then click the Save to DB
-          button
-        </p>
-
-        <div class = "button-group">
-          <button id="save-jc-productivity-data" class="button">
-            <span class="ms-Button-label">Save to DB</span>
-          </button>
-        </div>
-
-        <div class="step">Step 4</div>
-        <p class="label">
-          You can check the data you entered previously. Please click the Load from DB button. A new sheet will be
-          appended to the workbook where you will see the data that you modified in step 3
-        </p>
-
-        <div class = "button-group">
-          <button id="load-jc-productivity-data" class="button">
-            <span class="ms-Button-label">Load from DB</span>
-          </button>
-        </div>
-
-        <div class="step">Testing buttons - to be deleted 4</div>
-        <div class = "button-group">
-          
-          <button id="local-storage-save" class="button">
-            <span class="ms-Button-label">Get from server </span>
-          </button>
-
-          <button id="local-storage-get" class="button">
-            <span class="ms-Button-label">get from local storage </span>
-          </button>
-          <a href="https://olsenconsultingaddn.blob.core.windows.net/sharedfiles/AR%20Reconciliation%20Workbook%20V2.xlsm?sp=r&st=2021-11-21T17:33:22Z&se=2023-01-01T01:33:22Z&spr=https&sv=2020-08-04&sr=b&sig=0xMdA8NfPxON4ETOLJ6eoeYiCiA9s57sjOhXwkolCv8%3D">Download</a>
+          <div class="button-group">
+            <button id="load-jc-productivity-data" class="button">
+              <span class="ms-Button-label">Load from DB</span>
+            </button>
+          </div>
         </div>
       </div>
     </main>
@@ -135,6 +104,5 @@
       </div>
       <button class="MessageBanner-close"><i class="ms-Icon ms-Icon--ChromeClose"></i></button>
     </div> -->
-    
   </body>
 </html>

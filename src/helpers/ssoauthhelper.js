@@ -8,6 +8,7 @@
 const documentHelper = require("./documentHelper");
 const fallbackAuthHelper = require("./fallbackAuthHelper");
 const sso = require("office-addin-sso");
+const authModule = require("./authorization");
 let retryGetAccessToken = 0;
 
 export async function getGraphData() {
@@ -45,7 +46,9 @@ export async function getGraphData() {
       window.sessionStorage.setItem('userDisplayName', response.displayName);
       window.sessionStorage.setItem('userID', response.id);
 
-      sso.showMessage("Your data has been added to the document.");
+      authModule.authorizeUser();
+
+      //sso.showMessage("Your data has been added to the document.");
     }
   } catch (exception) {
     if (exception.code) {
