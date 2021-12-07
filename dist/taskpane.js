@@ -52,9 +52,8 @@ function authorizeUser() {
 
           var t = document.createTextNode(decodeButtonText(SAS[0]));
           button.appendChild(t);
-          buttonContainer.appendChild(button);
-          var pushPullContainer = document.getElementById("push-pull-container");
-          pushPullContainer.setAttribute("class", "button-container");
+          buttonContainer.appendChild(button); //let pushPullContainer = document.getElementById("push-pull-container");
+          //pushPullContainer.setAttribute("class", "button-container");
         }
       } catch (err) {
         _iterator.e(err);
@@ -20784,9 +20783,8 @@ Office.onReady(function (info) {
   if (info.host === Office.HostType.Excel) {
     //Add click handler to Authorization button
     document.getElementById("getGraphDataButton").onclick = ssoAuthHelper.getGraphData; //Add click handlers to action buttons
-
-    document.getElementById("save-jc-productivity-data").onclick = PushJCProgressEntryIntoVista;
-    document.getElementById("load-jc-productivity-data").onclick = LoadJCProgressEntry;
+    //document.getElementById("save-jc-productivity-data").onclick = PushJCProgressEntryIntoVista;
+    //document.getElementById("load-jc-productivity-data").onclick = LoadJCProgressEntry;
   }
 });
 

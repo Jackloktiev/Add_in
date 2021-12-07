@@ -14,8 +14,8 @@ Office.onReady((info) => {
     document.getElementById("getGraphDataButton").onclick = ssoAuthHelper.getGraphData;
 
     //Add click handlers to action buttons
-    document.getElementById("save-jc-productivity-data").onclick = PushJCProgressEntryIntoVista;
-    document.getElementById("load-jc-productivity-data").onclick = LoadJCProgressEntry;
+    //document.getElementById("save-jc-productivity-data").onclick = PushJCProgressEntryIntoVista;
+    //document.getElementById("load-jc-productivity-data").onclick = LoadJCProgressEntry;
 
   }
 });

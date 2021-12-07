@@ -30,8 +30,8 @@ export function authorizeUser() {
         let t = document.createTextNode(decodeButtonText(SAS[0]));
         button.appendChild(t);
         buttonContainer.appendChild(button);
-        let pushPullContainer = document.getElementById("push-pull-container");
-        pushPullContainer.setAttribute("class", "button-container");
+        //let pushPullContainer = document.getElementById("push-pull-container");
+        //pushPullContainer.setAttribute("class", "button-container");
       }
 
       function decodeButtonText(btnName) {
